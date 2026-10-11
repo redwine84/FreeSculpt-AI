@@ -3,7 +3,6 @@ package com.freesculpt.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -17,18 +16,27 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.freesculpt.engine.scene.ProjectScene
+import com.freesculpt.engine.scene.SculptTool
 
 @Composable
 fun WorkbenchScreen(
     onBackHome: () -> Unit,
 ) {
+    val scene = remember { ProjectScene() }
+    var selectedTool by remember { mutableStateOf(SculptTool.CLAY) }
+    val stats = remember(scene) { scene.stats() }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -63,26 +71,26 @@ fun WorkbenchScreen(
         }
 
         Row(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Card(
-                modifier = Modifier.width(200.dp),
+                modifier = Modifier.width(220.dp),
                 shape = RoundedCornerShape(22.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             ) {
                 Column(
                     modifier = Modifier
-                        .fillMaxHeight()
+                        .fillMaxSize()
                         .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    ToolChip("Clay")
-                    ToolChip("Smooth")
-                    ToolChip("Grab")
-                    ToolChip("Flatten")
-                    ToolChip("Rig")
-                    ToolChip("AI assist")
+                    ToolChip("Clay", selectedTool == SculptTool.CLAY) { selectedTool = SculptTool.CLAY }
+                    ToolChip("Smooth", selectedTool == SculptTool.SMOOTH) { selectedTool = SculptTool.SMOOTH }
+                    ToolChip("Grab", selectedTool == SculptTool.GRAB) { selectedTool = SculptTool.GRAB }
+                    ToolChip("Flatten", selectedTool == SculptTool.FLATTEN) { selectedTool = SculptTool.FLATTEN }
+                    ToolChip("Rig", selectedTool == SculptTool.RIG) { selectedTool = SculptTool.RIG }
+                    ToolChip("AI assist", selectedTool == SculptTool.AI) { selectedTool = SculptTool.AI }
                 }
             }
 
@@ -101,43 +109,55 @@ fun WorkbenchScreen(
             }
 
             Card(
-                modifier = Modifier.width(220.dp),
+                modifier = Modifier.width(240.dp),
                 shape = RoundedCornerShape(22.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             ) {
                 Column(
                     modifier = Modifier
-                        .fillMaxHeight()
+                        .fillMaxSize()
                         .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Text(
                         text = "Scene summary",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                     )
-                    SceneStat("Vertices", "2.1M")
-                    SceneStat("Polys", "4.8M")
-                    SceneStat("Animation", "Ready")
-                    SceneStat("AI", "Online")
+                    SceneStat("Vertices", stats.vertexCount.toString())
+                    SceneStat("Polys", stats.triangleCount.toString())
+                    SceneStat("Animation", if (stats.animationReady) "Ready" else "Pending")
+                    SceneStat("AI", if (stats.aiReady) "Online" else "Offline")
+                    SceneStat("Tool", selectedTool.name)
                 }
             }
         }
+
+        AIAssistantPanel(
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 
 @Composable
-private fun ToolChip(label: String) {
-    Card(
+private fun ToolChip(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
+    Button(
+        onClick = onClick,
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
+            contentColor = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+        ),
     ) {
         Text(
             text = label,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.fillMaxWidth(),
             fontWeight = FontWeight.SemiBold,
-            fontSize = 14.sp
+            fontSize = 14.sp,
         )
     }
 }

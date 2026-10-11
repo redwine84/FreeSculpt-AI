@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 
 sealed class Screen(val route: String) {
     data object Home : Screen("home")
@@ -12,9 +11,7 @@ sealed class Screen(val route: String) {
 }
 
 @Composable
-fun FreeSculptApp(
-    navController: NavHostController = rememberNavController(),
-) {
+fun AppNavHost(navController: NavHostController) {
     NavHost(
         navController = navController,
         startDestination = Screen.Home.route,
