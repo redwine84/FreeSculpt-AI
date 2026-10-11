@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">FreeSculpt-AI</string>
+    <string name="home_title">FreeSculpt-AI</string>
+    <string name="home_subtitle">3D sculpting, mesh design and AI-assisted creation</string>
+    <string name="start_sculpting">Start sculpting</string>
+    <string name="open_workspace">Open workspace</string>
+    <string name="ai_assistant">AI assistant</string>
+    <string name="sculpt_tools">Sculpt tools</string>
+    <string name="animation">Animation</string>
+    <string name="mesh_design">Mesh design</string>
+    <string name="viewport_ready">Viewport ready for sculpting pipeline</string>
+</resources>
