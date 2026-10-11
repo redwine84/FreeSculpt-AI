@@ -17,23 +17,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.freesculpt.ai.LocalAiAgent
-import kotlinx.coroutines.launch
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.freesculpt.viewmodel.AiAssistantViewModel
 
 @Composable
 fun AIAssistantPanel(
     modifier: Modifier = Modifier,
+    viewModel: AiAssistantViewModel = viewModel(),
 ) {
-    val aiAgent = remember { LocalAiAgent() }
-    var prompt by remember { mutableStateOf("Suggest a stylized character bust with balanced features and clean topology.") }
-    var response by remember { mutableStateOf("AI ready to assist with sculpting, design, and mesh optimization.") }
-    val scope = rememberCoroutineScope()
+    var prompt by remember { mutableStateOf(viewModel.prompt) }
+    var response by remember { mutableStateOf(viewModel.response) }
 
     Card(
         modifier = modifier,
@@ -44,7 +42,7 @@ fun AIAssistantPanel(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
                 text = "AI Assistant",
@@ -54,7 +52,10 @@ fun AIAssistantPanel(
 
             OutlinedTextField(
                 value = prompt,
-                onValueChange = { prompt = it },
+                onValueChange = {
+                    prompt = it
+                    viewModel.setPrompt(it)
+                },
                 modifier = Modifier.fillMaxWidth(),
                 label = { Text("Prompt") },
                 singleLine = false,
@@ -64,9 +65,8 @@ fun AIAssistantPanel(
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Button(
                     onClick = {
-                        scope.launch {
-                            response = aiAgent.generateAdvice(prompt)
-                        }
+                        viewModel.generate()
+                        response = viewModel.response
                     }
                 ) {
                     Text("Generate")
@@ -82,7 +82,7 @@ fun AIAssistantPanel(
                     )
                     .padding(12.dp),
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
             )
         }
     }

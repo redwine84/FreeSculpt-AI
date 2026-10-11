@@ -26,8 +26,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.freesculpt.engine.mesh.Vec3
 import com.freesculpt.engine.scene.EditorMode
-import com.freesculpt.engine.scene.ProjectScene
 import com.freesculpt.engine.scene.SculptTool
 import com.freesculpt.viewmodel.ProjectViewModel
 
@@ -140,6 +140,9 @@ fun WorkbenchScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(8.dp),
+                    onBrushAt = { x, y ->
+                        viewModel.applySculpt(Vec3(x * 1.25f, y * 1.25f, 0f))
+                    },
                 )
             }
 
