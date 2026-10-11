@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -43,7 +45,8 @@ fun WorkbenchScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(18.dp),
+            .padding(18.dp)
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(18.dp),
     ) {
         Row(
@@ -141,7 +144,7 @@ fun WorkbenchScreen(
                         .fillMaxSize()
                         .padding(8.dp),
                     onBrushAt = { x, y ->
-                        viewModel.applySculpt(Vec3(x * 1.25f, y * 1.25f, 0f))
+                        viewModel.applySculpt(x, y)
                     },
                 )
             }
@@ -187,16 +190,16 @@ fun WorkbenchScreen(
             )
         }
 
-        TimelinePreview(modifier = Modifier.fillMaxWidth())
-
-        ActionRow(
-            onExport = { /* export action placeholder */ },
-            onSyncAi = { /* AI sync placeholder */ },
-        )
-
-        AIAssistantPanel(
-            modifier = Modifier.fillMaxWidth(),
-        )
+        when (scene.mode) {
+            EditorMode.ANIMATE -> AnimationTimelinePanel(modifier = Modifier.fillMaxWidth())
+            EditorMode.EXPORT -> ExportPanel(
+                modifier = Modifier.fillMaxWidth(),
+                onExportOBJ = { /* export OBJ */ },
+                onExportGLTF = { /* export glTF */ },
+            )
+            EditorMode.AI -> AIAssistantPanel(modifier = Modifier.fillMaxWidth())
+            else -> ImportPanel(modifier = Modifier.fillMaxWidth())
+        }
     }
 }
 
