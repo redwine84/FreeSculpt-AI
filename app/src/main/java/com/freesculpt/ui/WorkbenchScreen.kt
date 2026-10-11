@@ -22,18 +22,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.freesculpt.engine.scene.EditorMode
 import com.freesculpt.engine.scene.ProjectScene
 import com.freesculpt.engine.scene.SculptTool
+import com.freesculpt.viewmodel.ProjectViewModel
 
 @Composable
 fun WorkbenchScreen(
     onBackHome: () -> Unit,
+    viewModel: ProjectViewModel = viewModel(),
 ) {
-    val scene = remember { ProjectScene() }
+    val scene = viewModel.scene
     var selectedTool by remember { mutableStateOf(SculptTool.CLAY) }
     val stats = remember(scene) { scene.stats() }
 
@@ -41,12 +44,12 @@ fun WorkbenchScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(18.dp),
-        verticalArrangement = Arrangement.spacedBy(18.dp)
+        verticalArrangement = Arrangement.spacedBy(18.dp),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = "Workbench",
@@ -62,17 +65,31 @@ fun WorkbenchScreen(
                     onClick = {},
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    )
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                    ),
                 ) {
                     Text("Save")
                 }
             }
         }
 
+        ModeTabs(
+            selected = scene.mode.name,
+            onSelect = { modeName ->
+                val mode = when (modeName) {
+                    "Rig" -> EditorMode.RIG
+                    "Animate" -> EditorMode.ANIMATE
+                    "AI" -> EditorMode.AI
+                    "Export" -> EditorMode.EXPORT
+                    else -> EditorMode.SCULPT
+                }
+                viewModel.setMode(mode)
+            },
+        )
+
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Card(
                 modifier = Modifier.width(220.dp),
@@ -83,14 +100,32 @@ fun WorkbenchScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    ToolChip("Clay", selectedTool == SculptTool.CLAY) { selectedTool = SculptTool.CLAY }
-                    ToolChip("Smooth", selectedTool == SculptTool.SMOOTH) { selectedTool = SculptTool.SMOOTH }
-                    ToolChip("Grab", selectedTool == SculptTool.GRAB) { selectedTool = SculptTool.GRAB }
-                    ToolChip("Flatten", selectedTool == SculptTool.FLATTEN) { selectedTool = SculptTool.FLATTEN }
-                    ToolChip("Rig", selectedTool == SculptTool.RIG) { selectedTool = SculptTool.RIG }
-                    ToolChip("AI assist", selectedTool == SculptTool.AI) { selectedTool = SculptTool.AI }
+                    ToolChip("Clay", selectedTool == SculptTool.CLAY) {
+                        selectedTool = SculptTool.CLAY
+                        viewModel.setTool(SculptTool.CLAY)
+                    }
+                    ToolChip("Smooth", selectedTool == SculptTool.SMOOTH) {
+                        selectedTool = SculptTool.SMOOTH
+                        viewModel.setTool(SculptTool.SMOOTH)
+                    }
+                    ToolChip("Grab", selectedTool == SculptTool.GRAB) {
+                        selectedTool = SculptTool.GRAB
+                        viewModel.setTool(SculptTool.GRAB)
+                    }
+                    ToolChip("Flatten", selectedTool == SculptTool.FLATTEN) {
+                        selectedTool = SculptTool.FLATTEN
+                        viewModel.setTool(SculptTool.FLATTEN)
+                    }
+                    ToolChip("Rig", selectedTool == SculptTool.RIG) {
+                        selectedTool = SculptTool.RIG
+                        viewModel.setTool(SculptTool.RIG)
+                    }
+                    ToolChip("AI assist", selectedTool == SculptTool.AI) {
+                        selectedTool = SculptTool.AI
+                        viewModel.setTool(SculptTool.AI)
+                    }
                 }
             }
 
@@ -104,7 +139,7 @@ fun WorkbenchScreen(
                 SculptViewport(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(8.dp)
+                        .padding(8.dp),
                 )
             }
 
@@ -117,7 +152,7 @@ fun WorkbenchScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     Text(
                         text = "Scene summary",
@@ -133,8 +168,31 @@ fun WorkbenchScreen(
             }
         }
 
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            ProjectOverviewCard(
+                title = "Workspace",
+                subtitle = scene.name,
+                modifier = Modifier.weight(1f),
+            )
+            ProjectOverviewCard(
+                title = "Mode",
+                subtitle = scene.mode.name,
+                modifier = Modifier.weight(1f),
+            )
+        }
+
+        TimelinePreview(modifier = Modifier.fillMaxWidth())
+
+        ActionRow(
+            onExport = { /* export action placeholder */ },
+            onSyncAi = { /* AI sync placeholder */ },
+        )
+
         AIAssistantPanel(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }
